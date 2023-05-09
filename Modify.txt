@@ -1,0 +1,51 @@
+#CREATED BY BRYTAN M KELLY MAY 8 2023, ALL RIGHTS FALL UNDER THE MIT LICENSE ATTACHED IN THE GITHUB
+import discord
+from discord.ext import commands
+
+intents = discord.Intents.default()
+intents.members = True
+intents.presences = True
+intents.guilds = True
+intents.messages = True
+intents.message_content = True
+
+# Replace 'YOUR_BOT_TOKEN' with your actual bot token
+bot_token = 'YOUR_BOT_TOKEN'
+
+bot = commands.Bot(command_prefix='/', intents=intents)
+
+#/sort automatically sorts the servers for most recent messages
+
+
+@bot.event
+async def on_ready():
+    print(f'Logged in as {bot.user.name} ({bot.user.id})')
+    print('------')
+
+
+@bot.event
+async def on_message(message):
+    await bot.process_commands(message)  # Required to process commands alongside on_message
+
+
+@bot.command(name='sort')
+async def move_channel(ctx):
+    guild = ctx.guild
+    channels = guild.channels
+
+    # Filter out text channels only
+    text_channels = [channel for channel in channels if isinstance(channel, discord.TextChannel)]
+
+    # Sort channels by message count in descending order
+    sorted_channels = sorted(text_channels, key=lambda c: c.last_message_id, reverse=True)
+
+    # Get the channel with the highest message count
+    most_active_channel = sorted_channels[0]
+
+    # Move the channel to the top of the list
+    await most_active_channel.edit(position=0)
+
+    print("The most active channel has been moved to the top")
+
+
+bot.run(bot_token)
